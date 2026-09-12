@@ -1,6 +1,11 @@
 """
 HyperAgent: Speculative Parallel DAG Framework for Low-Latency Autonomous Agent Workflows
 Reference Benchmark Implementation in Python 3.
+Features:
+- P-DAG with Kahn's Algorithm Wave Partitioning & DFS Cycle Detection
+- Branch-Isolated State Tree & Deterministic Rollback
+- 4 Baseline Engines: Sequential, Ordinary DAG, Speculative DAG, HyperAgent (Cache)
+- Adaptive Cost-Utility Speculative Engine (Break-Even Rule)
 """
 
 import time
@@ -317,6 +322,96 @@ class SpeculativeDAGEngine:
                             conf *= e.transition_probability
                         
                         if conf >= confidence_threshold and next_node.speculative_predictor:
+                            branch_id = f"spec_{next_nid}_{uuid.uuid4().hex[:6]}"
+                            predicted_inputs = next_node.speculative_predictor(state_mgr.get_canonical())
+                            state_mgr.create_speculative_branch(branch_id, predicted_inputs)
+                            
+                            metrics.total_speculative_dispatched += 1
+                            fut = pool.submit(run_tool, next_node, predicted_inputs)
+                            speculative_pool[next_nid] = (fut, branch_id, predicted_inputs)
+
+                curr_state = state_mgr.get_canonical()
+                wave_futures = []
+
+                for nid in wave:
+                    node = dag.nodes[nid]
+                    actual_inputs = {e.param_key: curr_state.get(e.param_key) for e in dag.in_edges[nid]}
+
+                    if nid in speculative_pool:
+                        fut, branch_id, pred_inputs = speculative_pool.pop(nid)
+                        spec_res, tool_ms = fut.result()
+                        with tool_time_lock:
+                            accumulated_tool_time += tool_ms
+                        
+                        if pred_inputs == actual_inputs:
+                            metrics.speculative_committed += 1
+                            state_mgr.commit_speculative_branch(branch_id, nid, spec_res)
+                        else:
+                            metrics.speculative_discarded += 1
+                            state_mgr.discard_speculative_branch(branch_id)
+                            wave_futures.append((nid, pool.submit(run_tool, node, actual_inputs)))
+                    else:
+                        wave_futures.append((nid, pool.submit(run_tool, node, actual_inputs)))
+
+                for nid, fut in wave_futures:
+                    res, tool_ms = fut.result()
+                    with tool_time_lock:
+                        accumulated_tool_time += tool_ms
+                    state_mgr.commit_speculative_branch(nid, nid, res)
+
+        t1 = time.perf_counter()
+        metrics.wall_clock_ms = (t1 - t0) * 1000.0
+        metrics.total_tool_time_ms = accumulated_tool_time
+        metrics.final_state = state_mgr.get_canonical()
+        return metrics
+
+
+class AdaptiveSpeculativeEngine:
+    """
+    Advanced Speculative Engine using the Break-Even Cost-Utility Rule:
+    Speculate if and only if: P_c * G > (1 - P_c) * C_r + C_o
+    where:
+    - P_c: confidence of transition (0.0 to 1.0)
+    - G: estimated latency gained (next_node.estimated_latency_ms)
+    - C_r: re-execution cost if rollback occurs (next_node.estimated_latency_ms)
+    - C_o: state cloning overhead (empirically ~0.5ms)
+    """
+    @staticmethod
+    def should_speculate(p_c: float, estimated_latency_ms: float, overhead_ms: float = 0.5) -> bool:
+        gain = p_c * estimated_latency_ms
+        loss = (1.0 - p_c) * estimated_latency_ms + overhead_ms
+        return gain > loss
+
+    @staticmethod
+    def run(dag: PDAG, initial_state: Dict[str, Any], max_workers: int = 8) -> ExecutionMetrics:
+        metrics = ExecutionMetrics(mode="Adaptive_Speculative_DAG")
+        state_mgr = StateManager(initial_state)
+        waves = dag.compute_concurrency_waves()
+        
+        t0 = time.perf_counter()
+        accumulated_tool_time = 0.0
+        tool_time_lock = threading.Lock()
+
+        speculative_pool: Dict[str, Tuple[Any, str, Dict[str, Any]]] = {}
+
+        def run_tool(node: Node, inputs: Dict[str, Any]) -> Tuple[Any, float]:
+            start_t = time.perf_counter()
+            res = node.execute_fn(inputs)
+            elapsed_ms = (time.perf_counter() - start_t) * 1000.0
+            return res, elapsed_ms
+
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            for wave_idx, wave in enumerate(waves):
+                if wave_idx + 1 < len(waves):
+                    next_wave = waves[wave_idx + 1]
+                    for next_nid in next_wave:
+                        next_node = dag.nodes[next_nid]
+                        p_c = 1.0
+                        for e in dag.in_edges[next_nid]:
+                            p_c *= e.transition_probability
+                        
+                        # Apply Break-Even Adaptive Rule
+                        if AdaptiveSpeculativeEngine.should_speculate(p_c, next_node.estimated_latency_ms) and next_node.speculative_predictor:
                             branch_id = f"spec_{next_nid}_{uuid.uuid4().hex[:6]}"
                             predicted_inputs = next_node.speculative_predictor(state_mgr.get_canonical())
                             state_mgr.create_speculative_branch(branch_id, predicted_inputs)
