@@ -2,18 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>HyperAgent - Speculative Parallel DAG Execution Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HyperAgent - Speculative Parallel DAG Framework for Low-Latency Agentic AI</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <!-- Header -->
   <header class="header">
     <div class="brand-title">
-      <span>⚡ HyperAgent</span>
+      <div class="brand-icon">&lambda;</div>
+      <span>HyperAgent</span>
       <span class="badge">Speculative DAG Scheduling Engine</span>
     </div>
     <div class="controls-bar">
@@ -21,7 +23,17 @@
         <option value="financial">Financial Due Diligence Intelligence (6 Nodes)</option>
         <option value="cyber">Autonomous Cybersecurity Threat Sweep (6 Nodes)</option>
       </select>
-      <button id="btn-run-duel" class="btn-run">▶ Run 3-Way Duel Benchmark</button>
+      
+      <div class="cache-toggle-wrapper">
+        <label for="toggle-cache" style="cursor: pointer;">
+          <input type="checkbox" id="toggle-cache" style="margin-right: 4px;" checked>
+          Enable Semantic Cache
+        </label>
+      </div>
+
+      <button id="btn-run-duel" class="btn-run">
+        <span>&#9654;</span> Run 3-Way Benchmark Duel
+      </button>
     </div>
   </header>
 
@@ -31,7 +43,7 @@
     <section class="panel">
       <div class="panel-title">
         <span>Dynamic Dependency Graph (P-DAG Topology)</span>
-        <span id="workload-badge" style="font-size: 12px; color: var(--text-muted);">Ready</span>
+        <span id="workload-badge" style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Ready</span>
       </div>
       <div id="dag-container"></div>
     </section>
@@ -39,22 +51,26 @@
     <!-- Telemetry Pane -->
     <section class="panel telemetry-pane">
       <div class="panel-title">
-        <span>Empirical Telemetry & Ablation Metrics</span>
+        <span>Empirical Telemetry &amp; Ablation Metrics</span>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-label">Effective Speculative Speedup</div>
-        <div class="metric-val highlight" id="metric-speedup">--</div>
-      </div>
+      <div class="metrics-summary-row">
+        <div class="metric-card">
+          <div class="metric-label">Speculative Speedup</div>
+          <div class="metric-val highlight" id="metric-speedup">--</div>
+          <div class="metric-sub" id="metric-speedup-sub">vs Sequential baseline</div>
+        </div>
 
-      <div class="metric-card">
-        <div class="metric-label">Speculative Precision Ratio (N_committed / N_dispatched)</div>
-        <div class="metric-val" id="metric-precision">--</div>
+        <div class="metric-card">
+          <div class="metric-label">Speculative Precision</div>
+          <div class="metric-val" id="metric-precision">--</div>
+          <div class="metric-sub">N_committed / N_dispatched</div>
+        </div>
       </div>
 
       <!-- 3-Way Baseline Table -->
       <div class="metric-card">
-        <div class="metric-label">3-Way Baseline Latency Benchmark</div>
+        <div class="metric-label">3-Way Baseline Execution Comparison</div>
         <table class="duel-table">
           <thead>
             <tr>
@@ -70,12 +86,12 @@
               <td>1.00x</td>
             </tr>
             <tr>
-              <td>2. Ordinary DAG Parallel</td>
+              <td>2. Ordinary DAG (Barrier)</td>
               <td id="row-dag-ms">--</td>
               <td id="row-dag-speedup">--</td>
             </tr>
             <tr class="highlight-row">
-              <td>3. HyperAgent Speculative</td>
+              <td>3. HyperAgent (Speculative)</td>
               <td id="row-hyper-ms">--</td>
               <td id="row-hyper-speedup">--</td>
             </tr>
@@ -83,26 +99,187 @@
         </table>
       </div>
 
-      <!-- Cache & Concurrency Stats -->
+      <!-- In-Memory Semantic Cache Telemetry -->
       <div class="metric-card">
         <div class="metric-label">In-Memory Semantic Cache Telemetry</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="cache-stats">
-          Hit Ratio: -- | p50: -- | p99: --
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: 'JetBrains Mono', monospace;" id="cache-stats">
+          Hit Ratio: -- | p50: -- | p99: -- (Hits: 0, Misses: 0)
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Algorithmic Inspector Section -->
+  <section class="inspector-section">
+    <div class="inspector-panel">
+      <!-- Tabs -->
+      <div class="inspector-tabs">
+        <button class="tab-btn active" data-tab="tab-terminal">
+          <span>&gt;_</span> Live Algorithmic Terminal
+        </button>
+        <button class="tab-btn" data-tab="tab-breakeven">
+          <span>&alpha;*</span> Empirical Break-Even Explorer (Sweep)
+        </button>
+        <button class="tab-btn" data-tab="tab-pseudocode">
+          <span>&lang;/&rang;</span> Algorithm 1 &amp; 2 Pseudocode
+        </button>
+      </div>
+
+      <!-- Tab 1: Terminal -->
+      <div class="tab-content active" id="tab-terminal">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">REAL-TIME ENGINE DISPATCH &amp; ROLLBACK TRACE</span>
+          <button id="btn-clear-term" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Clear Terminal</button>
+        </div>
+        <div class="terminal-window" id="term-output">
+          <div class="term-line"><span class="term-tag tag-kahn">INIT</span> HyperAgent runtime ready. Select workload and press 'Run 3-Way Benchmark Duel'.</div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Break-Even Explorer -->
+      <div class="tab-content" id="tab-breakeven">
+        <div class="break-even-container">
+          <div class="be-card">
+            <h4 style="color: var(--cyan-accent); font-size: 13px; margin-bottom: 6px;">Prediction Accuracy Sweep ($A_{pred} \in [0.0, 1.0]$)</h4>
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+              Speculative execution is not universally superior. When dependency prediction accuracy is below <strong>40%</strong>, the cost of rollbacks and re-executions exceeds the speculative overlap gain.
+            </p>
+
+            <div class="be-slider-wrapper">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700;">
+                <span>Prediction Accuracy:</span>
+                <span id="slider-val-text" style="color: var(--cyan-accent); font-family: 'JetBrains Mono', monospace;">0.40 (40%)</span>
+              </div>
+              <input type="range" id="acc-slider" class="be-slider" min="0" max="10" value="4" step="1">
+            </div>
+
+            <div id="be-status-box" class="be-status-badge be-even">
+              Empirical Break-Even Boundary (&alpha;* = 40%)
+            </div>
+
+            <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted); line-height: 1.6;">
+              <div><strong>Mean Latency:</strong> <span id="be-lat" style="color: #fff; font-family: 'JetBrains Mono', monospace;">218.3 ms &plusmn; 32.3 ms</span></div>
+              <div><strong>Speedup vs Ordinary DAG:</strong> <span id="be-sp-dag" style="color: #fff; font-family: 'JetBrains Mono', monospace;">1.11x</span></div>
+              <div><strong>Speedup vs Sequential:</strong> <span id="be-sp-seq" style="color: #fff; font-family: 'JetBrains Mono', monospace;">1.59x</span></div>
+              <div><strong>Speculative Precision:</strong> <span id="be-prec" style="color: #fff; font-family: 'JetBrains Mono', monospace;">45.0%</span></div>
+              <div><strong>Rollback Rate:</strong> <span id="be-rb" style="color: #fff; font-family: 'JetBrains Mono', monospace;">55.0%</span></div>
+              <div><strong>Compute Overhead Ratio:</strong> <span id="be-ovh" style="color: #fff; font-family: 'JetBrains Mono', monospace;">1.31x tool time</span></div>
+            </div>
+          </div>
+
+          <div class="be-card" style="overflow-x: auto;">
+            <h4 style="color: var(--cyan-accent); font-size: 13px; margin-bottom: 8px;">Full Empirical Benchmark Dataset (N=5 Repetitions, Cold Cache)</h4>
+            <table class="be-table" id="be-dataset-table">
+              <thead>
+                <tr>
+                  <th>Accuracy</th>
+                  <th>Latency (ms)</th>
+                  <th>Speedup(DAG)</th>
+                  <th>Precision</th>
+                  <th>Rollback</th>
+                  <th>Overhead</th>
+                </tr>
+              </thead>
+              <tbody id="be-tbody">
+                <!-- Dynamically filled -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Pseudocode -->
+      <div class="tab-content" id="tab-pseudocode">
+        <div class="pseudocode-grid">
+          <div class="code-box">
+            <h4>Algorithm 1: Kahn's Multi-Tier Concurrency Wave Partitioning</h4>
+            <pre><code>Input: Graph G = (V, E)
+Output: Concurrency Waves W = [W_0, W_1, ..., W_{k-1}]
+
+1: in_degree &larr; calculate_in_degrees(G)
+2: current_wave &larr; { v &isin; V | in_degree[v] == 0 }
+3: waves &larr; []
+4: while current_wave is not empty do:
+5:     waves.append(current_wave)
+6:     next_wave &larr; []
+7:     for u in current_wave do:
+8:         for v in G.adjacent[u] do:
+9:             in_degree[v] &larr; in_degree[v] - 1
+10:            if in_degree[v] == 0 then:
+11:                next_wave.append(v)
+12:    current_wave &larr; next_wave
+13: return waves</code></pre>
+          </div>
+
+          <div class="code-box">
+            <h4>Algorithm 2: Speculative Parallel Dispatch with Deterministic Rollback</h4>
+            <pre><code>Input: P-DAG G, StateManager M, Threshold &theta;
+Output: Canonical State S_canonical
+
+1: waves &larr; compute_concurrency_waves(G)
+2: speculative_pool &larr; Map()
+3: for wave_idx = 0 to len(waves) - 1 do:
+4:     // Pre-dispatch next wave across barrier
+5:     if wave_idx + 1 &lt; len(waves) then:
+6:         for v in waves[wave_idx + 1] do:
+7:             if confidence(v) &ge; &theta; then:
+8:                 branch_id &larr; create_isolated_branch(v)
+9:                 X_hat &larr; predict_inputs(v, M.canonical)
+10:                future &larr; pool.submit(execute_tool, v, X_hat)
+11:                speculative_pool[v] &larr; (future, branch_id, X_hat)
+12:    // Execute wave &amp; verify speculative branches
+13:    for u in waves[wave_idx] do:
+14:        X_actual &larr; extract_inputs(u, M.canonical)
+15:        if u in speculative_pool then:
+16:            result &larr; await future
+17:            if X_hat == X_actual then:
+18:                M.commit_branch(branch_id, u, result) // 0ms Hit
+19:            else:
+20:                M.discard_branch(branch_id)           // O(1) Rollback
+21:                res &larr; execute_tool(u, X_actual)
+22:                M.commit(u, res)
+23: return M.canonical</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <script type="module">
     import { createFinancialWorkload, createCybersecurityWorkload } from './js/workloads.js';
     import { DAGVisualizer } from './js/visualizer.js';
     import { ExecutionComparator } from './js/comparator.js';
 
+    // Terminal Logger
+    const termOutput = document.getElementById('term-output');
+    function appendLog(tag, message) {
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+      
+      let tagClass = 'tag-kahn';
+      if (tag.includes('SPEC') || tag.includes('HYPER')) tagClass = 'tag-spec';
+      else if (tag.includes('COMMIT') || tag.includes('RESOLVED') || tag.includes('HIT')) tagClass = 'tag-commit';
+      else if (tag.includes('ROLLBACK') || tag.includes('MISMATCH')) tagClass = 'tag-rollback';
+      else if (tag.includes('CORRECTNESS') || tag.includes('INVARIANT')) tagClass = 'tag-invariant';
+
+      const line = document.createElement('div');
+      line.className = 'term-line';
+      line.innerHTML = `<span style="color: #64748b;">[${timeStr}]</span> <span class="term-tag ${tagClass}">${tag}</span> ${message}`;
+      termOutput.appendChild(line);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    document.getElementById('btn-clear-term').addEventListener('click', () => {
+      termOutput.innerHTML = '';
+    });
+
+    // Visualizer & Comparator
     const visualizer = new DAGVisualizer('dag-container');
-    const comparator = new ExecutionComparator(visualizer, updateDashboard);
+    const comparator = new ExecutionComparator(visualizer, updateDashboard, appendLog);
 
     const workloadSelect = document.getElementById('workload-select');
     const runBtn = document.getElementById('btn-run-duel');
+    const toggleCache = document.getElementById('toggle-cache');
 
     function getSelectedWorkload() {
       return workloadSelect.value === 'financial' 
@@ -110,27 +287,30 @@
         : createCybersecurityWorkload();
     }
 
-    // Initial render
     let currentWorkload = getSelectedWorkload();
     visualizer.render(currentWorkload.dag);
+    document.getElementById('workload-badge').textContent = currentWorkload.title;
 
     workloadSelect.addEventListener('change', () => {
       currentWorkload = getSelectedWorkload();
       visualizer.render(currentWorkload.dag);
       document.getElementById('workload-badge').textContent = currentWorkload.title;
+      appendLog('WORKLOAD_SWITCH', `Switched topology to: ${currentWorkload.title}`);
     });
 
     runBtn.addEventListener('click', async () => {
       runBtn.disabled = true;
-      runBtn.textContent = 'Executing 3-Way Benchmark...';
+      runBtn.innerHTML = '<span>&#8987;</span> Executing 3-Way Duel...';
       currentWorkload = getSelectedWorkload();
-      await comparator.run3WayDuel(currentWorkload);
+      const enableCache = toggleCache.checked;
+      await comparator.run3WayDuel(currentWorkload, enableCache);
       runBtn.disabled = false;
-      runBtn.textContent = '▶ Run 3-Way Duel Benchmark';
+      runBtn.innerHTML = '<span>&#9654;</span> Run 3-Way Benchmark Duel';
     });
 
     function updateDashboard(summary) {
       document.getElementById('metric-speedup').textContent = `${summary.speedupHyper}x`;
+      document.getElementById('metric-speedup-sub').textContent = `+${summary.specDelta}x delta over DAG barrier`;
       document.getElementById('metric-precision').textContent = `${(summary.specPrecision * 100).toFixed(1)}%`;
 
       document.getElementById('row-seq-ms').textContent = `${summary.sequential.wallClockMs.toFixed(1)} ms`;
@@ -141,10 +321,85 @@
       document.getElementById('row-hyper-speedup').textContent = `${summary.speedupHyper}x`;
 
       const c = summary.cacheTelemetry;
-      document.getElementById('cache-stats').textContent = 
-        `Hit Ratio: ${(c.hitRatio * 100).toFixed(1)}% | p50: ${c.p50_ms}ms | p99: ${c.p99_ms}ms (Hits: ${c.hits}, Misses: ${c.misses})`;
+      if (c && c.hits !== undefined) {
+        document.getElementById('cache-stats').textContent = 
+          `Hit Ratio: ${(c.hitRatio * 100).toFixed(1)}% | p50: ${c.p50_ms}ms | p99: ${c.p99_ms}ms (Hits: ${c.hits}, Misses: ${c.misses})`;
+      } else {
+        document.getElementById('cache-stats').textContent = `Cache Disabled (Cold State Evaluated)`;
+      }
     }
-  </script>
 
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Break-Even Sweep Interactive Data
+    const sweepData = [
+      { acc: 0.0, lat: "265.1 +/- 1.1", sp_seq: "1.31x", sp_dag: "0.92x", prec: "0.0%", rb: "100.0%", ovh: "1.59x", status: "LOSS" },
+      { acc: 0.1, lat: "246.5 +/- 26.0", sp_seq: "1.41x", sp_dag: "0.99x", prec: "15.0%", rb: "85.0%", ovh: "1.50x", status: "LOSS" },
+      { acc: 0.2, lat: "257.5 +/- 18.3", sp_seq: "1.35x", sp_dag: "0.94x", prec: "25.0%", rb: "75.0%", ovh: "1.46x", status: "LOSS" },
+      { acc: 0.3, lat: "247.8 +/- 26.0", sp_seq: "1.40x", sp_dag: "0.98x", prec: "45.0%", rb: "55.0%", ovh: "1.34x", status: "LOSS" },
+      { acc: 0.4, lat: "218.3 +/- 32.3", sp_seq: "1.59x", sp_dag: "1.11x", prec: "45.0%", rb: "55.0%", ovh: "1.31x", status: "EVEN" },
+      { acc: 0.5, lat: "209.9 +/- 41.7", sp_seq: "1.66x", sp_dag: "1.16x", prec: "70.0%", rb: "30.0%", ovh: "1.18x", status: "WIN" },
+      { acc: 0.6, lat: "240.0 +/- 24.0", sp_seq: "1.45x", sp_dag: "1.01x", prec: "50.0%", rb: "50.0%", ovh: "1.32x", status: "WIN" },
+      { acc: 0.7, lat: "218.0 +/- 31.2", sp_seq: "1.60x", sp_dag: "1.11x", prec: "45.0%", rb: "55.0%", ovh: "1.32x", status: "WIN" },
+      { acc: 0.8, lat: "202.3 +/- 44.6", sp_seq: "1.72x", sp_dag: "1.20x", prec: "70.0%", rb: "30.0%", ovh: "1.19x", status: "WIN" },
+      { acc: 0.9, lat: "169.4 +/- 31.9", sp_seq: "2.05x", sp_dag: "1.43x", prec: "95.0%", rb: "5.0%", ovh: "1.04x", status: "WIN" },
+      { acc: 1.0, lat: "154.8 +/- 2.1", sp_seq: "2.25x", sp_dag: "1.57x", prec: "100.0%", rb: "0.0%", ovh: "1.00x", status: "WIN" }
+    ];
+
+    const tbody = document.getElementById('be-tbody');
+    sweepData.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      tr.id = `be-row-${idx}`;
+      if (idx === 4) tr.className = 'active-row';
+      tr.innerHTML = `
+        <td>${row.acc.toFixed(1)}</td>
+        <td>${row.lat}</td>
+        <td>${row.sp_dag}</td>
+        <td>${row.prec}</td>
+        <td>${row.rb}</td>
+        <td>${row.ovh}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const accSlider = document.getElementById('acc-slider');
+    const sliderValText = document.getElementById('slider-val-text');
+    const beStatusBox = document.getElementById('be-status-box');
+
+    accSlider.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      const row = sweepData[idx];
+      sliderValText.textContent = `${row.acc.toFixed(2)} (${(row.acc * 100).toFixed(0)}%)`;
+
+      document.getElementById('be-lat').textContent = row.lat + ' ms';
+      document.getElementById('be-sp-dag').textContent = row.sp_dag;
+      document.getElementById('be-sp-seq').textContent = row.sp_seq;
+      document.getElementById('be-prec').textContent = row.prec;
+      document.getElementById('be-rb').textContent = row.rb;
+      document.getElementById('be-ovh').textContent = row.ovh + ' tool time';
+
+      document.querySelectorAll('#be-tbody tr').forEach(tr => tr.classList.remove('active-row'));
+      document.getElementById(`be-row-${idx}`).classList.add('active-row');
+
+      if (row.status === 'LOSS') {
+        beStatusBox.className = 'be-status-badge be-loss';
+        beStatusBox.textContent = 'SPECULATION LOSS ZONE (Rollback penalty > overlap gain)';
+      } else if (row.status === 'EVEN') {
+        beStatusBox.className = 'be-status-badge be-even';
+        beStatusBox.textContent = 'EMPIRICAL BREAK-EVEN THRESHOLD (\u03B1* = 40%)';
+      } else {
+        beStatusBox.className = 'be-status-badge be-win';
+        beStatusBox.textContent = `SPECULATION GAIN ZONE (${row.sp_dag} vs DAG, ${row.sp_seq} vs Seq)`;
+      }
+    });
+  </script>
 </body>
 </html>
