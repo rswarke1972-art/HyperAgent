@@ -1,0 +1,100 @@
+{
+  "Financial_Diligence": {
+    "Sequential": {
+      "mode": "Sequential",
+      "wall_clock_ms": 3452.42,
+      "total_tool_time_ms": 3452.1,
+      "speculative_dispatched": 0,
+      "speculative_committed": 0,
+      "speculative_discarded": 0,
+      "speculative_precision": 1.0,
+      "cache": {}
+    },
+    "Ordinary_DAG": {
+      "mode": "Ordinary_DAG",
+      "wall_clock_ms": 2404.21,
+      "total_tool_time_ms": 3452.9,
+      "speculative_dispatched": 0,
+      "speculative_committed": 0,
+      "speculative_discarded": 0,
+      "speculative_precision": 1.0,
+      "cache": {}
+    },
+    "Speculative_DAG": {
+      "mode": "Speculative_DAG",
+      "wall_clock_ms": 1703.68,
+      "total_tool_time_ms": 3952.34,
+      "speculative_dispatched": 4,
+      "speculative_committed": 3,
+      "speculative_discarded": 1,
+      "speculative_precision": 0.75,
+      "cache": {}
+    },
+    "HyperAgent_Complete": {
+      "mode": "HyperAgent_Complete",
+      "wall_clock_ms": 1.79,
+      "total_tool_time_ms": 3.5,
+      "speculative_dispatched": 4,
+      "speculative_committed": 3,
+      "speculative_discarded": 1,
+      "speculative_precision": 0.75,
+      "cache": {
+        "hits": 7,
+        "misses": 7,
+        "hit_ratio": 0.5,
+        "p50_ms": 0.0018,
+        "p95_ms": 0.0074,
+        "p99_ms": 0.0074
+      }
+    }
+  },
+  "Cybersecurity_Sweep": {
+    "Sequential": {
+      "mode": "Sequential",
+      "wall_clock_ms": 3503.8,
+      "total_tool_time_ms": 3503.36,
+      "speculative_dispatched": 0,
+      "speculative_committed": 0,
+      "speculative_discarded": 0,
+      "speculative_precision": 1.0,
+      "cache": {}
+    },
+    "Ordinary_DAG": {
+      "mode": "Ordinary_DAG",
+      "wall_clock_ms": 2554.98,
+      "total_tool_time_ms": 3502.27,
+      "speculative_dispatched": 0,
+      "speculative_committed": 0,
+      "speculative_discarded": 0,
+      "speculative_precision": 1.0,
+      "cache": {}
+    },
+    "Speculative_DAG": {
+      "mode": "Speculative_DAG",
+      "wall_clock_ms": 1554.87,
+      "total_tool_time_ms": 3502.59,
+      "speculative_dispatched": 4,
+      "speculative_committed": 4,
+      "speculative_discarded": 0,
+      "speculative_precision": 1.0,
+      "cache": {}
+    },
+    "HyperAgent_Complete": {
+      "mode": "HyperAgent_Complete",
+      "wall_clock_ms": 2.78,
+      "total_tool_time_ms": 3.0,
+      "speculative_dispatched": 4,
+      "speculative_committed": 4,
+      "speculative_discarded": 0,
+      "speculative_precision": 1.0,
+      "cache": {
+        "hits": 6,
+        "misses": 6,
+        "hit_ratio": 0.5,
+        "p50_ms": 0.0022,
+        "p95_ms": 0.0051,
+        "p99_ms": 0.0051
+      }
+    }
+  }
+}

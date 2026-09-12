@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HyperAgent - Speculative Parallel DAG Execution Engine</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand-title">
+      <span>⚡ HyperAgent</span>
+      <span class="badge">Speculative DAG Scheduling Engine</span>
+    </div>
+    <div class="controls-bar">
+      <select id="workload-select" class="select-workload">
+        <option value="financial">Financial Due Diligence Intelligence (6 Nodes)</option>
+        <option value="cyber">Autonomous Cybersecurity Threat Sweep (6 Nodes)</option>
+      </select>
+      <button id="btn-run-duel" class="btn-run">▶ Run 3-Way Duel Benchmark</button>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="dashboard-grid">
+    <!-- Graph Pane -->
+    <section class="panel">
+      <div class="panel-title">
+        <span>Dynamic Dependency Graph (P-DAG Topology)</span>
+        <span id="workload-badge" style="font-size: 12px; color: var(--text-muted);">Ready</span>
+      </div>
+      <div id="dag-container"></div>
+    </section>
+
+    <!-- Telemetry Pane -->
+    <section class="panel telemetry-pane">
+      <div class="panel-title">
+        <span>Empirical Telemetry & Ablation Metrics</span>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Effective Speculative Speedup</div>
+        <div class="metric-val highlight" id="metric-speedup">--</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Speculative Precision Ratio (N_committed / N_dispatched)</div>
+        <div class="metric-val" id="metric-precision">--</div>
+      </div>
+
+      <!-- 3-Way Baseline Table -->
+      <div class="metric-card">
+        <div class="metric-label">3-Way Baseline Latency Benchmark</div>
+        <table class="duel-table">
+          <thead>
+            <tr>
+              <th>Engine Mode</th>
+              <th>Wall-Clock</th>
+              <th>Speedup</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1. Sequential Baseline</td>
+              <td id="row-seq-ms">--</td>
+              <td>1.00x</td>
+            </tr>
+            <tr>
+              <td>2. Ordinary DAG Parallel</td>
+              <td id="row-dag-ms">--</td>
+              <td id="row-dag-speedup">--</td>
+            </tr>
+            <tr class="highlight-row">
+              <td>3. HyperAgent Speculative</td>
+              <td id="row-hyper-ms">--</td>
+              <td id="row-hyper-speedup">--</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cache & Concurrency Stats -->
+      <div class="metric-card">
+        <div class="metric-label">In-Memory Semantic Cache Telemetry</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="cache-stats">
+          Hit Ratio: -- | p50: -- | p99: --
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createFinancialWorkload, createCybersecurityWorkload } from './js/workloads.js';
+    import { DAGVisualizer } from './js/visualizer.js';
+    import { ExecutionComparator } from './js/comparator.js';
+
+    const visualizer = new DAGVisualizer('dag-container');
+    const comparator = new ExecutionComparator(visualizer, updateDashboard);
+
+    const workloadSelect = document.getElementById('workload-select');
+    const runBtn = document.getElementById('btn-run-duel');
+
+    function getSelectedWorkload() {
+      return workloadSelect.value === 'financial' 
+        ? createFinancialWorkload() 
+        : createCybersecurityWorkload();
+    }
+
+    // Initial render
+    let currentWorkload = getSelectedWorkload();
+    visualizer.render(currentWorkload.dag);
+
+    workloadSelect.addEventListener('change', () => {
+      currentWorkload = getSelectedWorkload();
+      visualizer.render(currentWorkload.dag);
+      document.getElementById('workload-badge').textContent = currentWorkload.title;
+    });
+
+    runBtn.addEventListener('click', async () => {
+      runBtn.disabled = true;
+      runBtn.textContent = 'Executing 3-Way Benchmark...';
+      currentWorkload = getSelectedWorkload();
+      await comparator.run3WayDuel(currentWorkload);
+      runBtn.disabled = false;
+      runBtn.textContent = '▶ Run 3-Way Duel Benchmark';
+    });
+
+    function updateDashboard(summary) {
+      document.getElementById('metric-speedup').textContent = `${summary.speedupHyper}x`;
+      document.getElementById('metric-precision').textContent = `${(summary.specPrecision * 100).toFixed(1)}%`;
+
+      document.getElementById('row-seq-ms').textContent = `${summary.sequential.wallClockMs.toFixed(1)} ms`;
+      document.getElementById('row-dag-ms').textContent = `${summary.ordinaryDAG.wallClockMs.toFixed(1)} ms`;
+      document.getElementById('row-dag-speedup').textContent = `${summary.speedupDAG}x`;
+
+      document.getElementById('row-hyper-ms').textContent = `${summary.hyperAgent.wallClockMs.toFixed(1)} ms`;
+      document.getElementById('row-hyper-speedup').textContent = `${summary.speedupHyper}x`;
+
+      const c = summary.cacheTelemetry;
+      document.getElementById('cache-stats').textContent = 
+        `Hit Ratio: ${(c.hitRatio * 100).toFixed(1)}% | p50: ${c.p50_ms}ms | p99: ${c.p99_ms}ms (Hits: ${c.hits}, Misses: ${c.misses})`;
+    }
+  </script>
+
+</body>
+</html>
